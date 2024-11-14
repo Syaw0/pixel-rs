@@ -1,0 +1,13 @@
+[package]
+name = "pixel-rs"
+version = "0.1.0"
+edition = "2021"
+description = ""
+authors = ["Siavash Siamhb7@protonmail.com"]
+homepage = "https://crates.io/crates/pixel-rs"
+repository = "https://github.com/Syaw0/pixel-rs"
+license = "MIT"
+keywords = []
+categories = []
+
+[dependencies]
