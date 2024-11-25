@@ -53,10 +53,51 @@ fn main() -> Result<(), Error> {
     file.read_exact(&mut image_header_data_bytes)?;
     println!("image header {image_header_data_bytes:?}");
 
+    let image_width: [u8; 4] = image_header_data_bytes[0..4].try_into().expect("Error");
+    println!("width:{}px", u32::from_be_bytes(image_width.clone()));
+
+    let image_height: [u8; 4] = image_header_data_bytes[4..8].try_into().expect("Error");
+    println!("height:{}px", u32::from_be_bytes(image_height.clone()));
+
+    let image_bit_deps: [u8; 1] = image_header_data_bytes[8..9].try_into().expect("Error");
+    println!(
+        "image_bit_deps:{} number of bits per pixel",
+        u8::from_be_bytes(image_bit_deps.clone())
+    );
+
+    let image_color_type: [u8; 1] = image_header_data_bytes[9..10].try_into().expect("Error");
+    println!(
+        "image_color_type:{} 0 = grayscale, 2 = RGB, 3 = palette, 4 = grayscale with alpha, 6 = RGBA",
+        u8::from_be_bytes(image_color_type.clone())
+    );
+
+    let image_compression_method: [u8; 1] = image_header_data_bytes[10..11]
+        .try_into()
+        .expect("Error");
+    println!(
+        "image_compression_method:{} always 0 = deflate/inflate",
+        u8::from_be_bytes(image_compression_method.clone())
+    );
+
+    let image_filter_method: [u8; 1] = image_header_data_bytes[11..12].try_into().expect("Error");
+    println!(
+        "image_filter_method:{} always 0 = none",
+        u8::from_be_bytes(image_filter_method.clone())
+    );
+
+    let image_iterlace_method: [u8; 1] = image_header_data_bytes[12..13].try_into().expect("Error");
+    println!(
+        "image_iterlace_method:{}  0 = none, 1 = Adam7",
+        u8::from_be_bytes(image_iterlace_method.clone())
+    );
+
+    println!(
+        "{image_width:?} {image_height:?} {image_bit_deps:?} {image_color_type:?} {image_compression_method:?} {image_filter_method:?} {image_iterlace_method:?}"
+    );
+
     let mut crc_image_header = [0; 4];
     file.read_exact(&mut crc_image_header)?;
     println!("crc value {crc_image_header:?}");
-
     let mut chunk_data = Vec::new();
     chunk_data.extend_from_slice(&chunk_type_bytes);
     // chunk_data.extend_from_slice(&legnth_bytes);
@@ -74,6 +115,21 @@ fn main() -> Result<(), Error> {
     } else {
         println!("CRC is not okay!");
     }
+
+    // =============================
+
+    let mut legnth_bytes = [0; 4];
+    file.read_exact(&mut legnth_bytes)?;
+
+    let length = u32::from_be_bytes(legnth_bytes);
+    println!("length {length}");
+
+    let mut chunk_type_bytes = [0; 4];
+    file.read_exact(&mut chunk_type_bytes)?;
+    // let chunk_type = u32::from_be_bytes(chunk_type_bytes);
+    let chunk_type_string = str::from_utf8(&chunk_type_bytes).unwrap();
+
+    println!("chunk_type {chunk_type_bytes:?} | str: {chunk_type_string:?}");
 
     Ok(())
 }
