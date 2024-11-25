@@ -121,7 +121,7 @@ fn main() -> Result<(), Error> {
     let mut legnth_bytes = [0; 4];
     file.read_exact(&mut legnth_bytes)?;
 
-    let length = u32::from_be_bytes(legnth_bytes);
+    let length = u32::from_be_bytes(legnth_bytes) as usize;
     println!("length {length}");
 
     let mut chunk_type_bytes = [0; 4];
@@ -130,6 +130,71 @@ fn main() -> Result<(), Error> {
     let chunk_type_string = str::from_utf8(&chunk_type_bytes).unwrap();
 
     println!("chunk_type {chunk_type_bytes:?} | str: {chunk_type_string:?}");
+
+    let mut image_data_bytes = vec![0; length];
+    file.read_exact(&mut image_data_bytes)?;
+    println!("image data {}", image_data_bytes.len());
+
+    let mut image_crc: [i32; 4] = [0; 4];
+    file.read_exact(&mut crc_image_header)?;
+    println!("crc value {image_crc:?}");
+    let mut chunk_data = Vec::new();
+    chunk_data.extend_from_slice(&chunk_type_bytes);
+    // chunk_data.extend_from_slice(&legnth_bytes);
+    chunk_data.extend_from_slice(&image_data_bytes);
+
+    // let mut crc_image_header_calculated = 0xffffffff;
+
+    let crc_image_header_calculated_be = crc32(&chunk_data);
+
+    println!("crc value calculated {crc_image_header_calculated_be:?}");
+    println!("crc header value :{}", u32::from_be_bytes(crc_image_header));
+
+    if crc_image_header_calculated_be == u32::from_be_bytes(crc_image_header) {
+        println!("CRC is okay!");
+    } else {
+        println!("CRC is not okay!");
+    }
+
+    // ============================================================
+
+    let mut legnth_bytes = [0; 4];
+    file.read_exact(&mut legnth_bytes)?;
+
+    let length = u32::from_be_bytes(legnth_bytes) as usize;
+    println!("length {length}");
+
+    let mut chunk_type_bytes = [0; 4];
+    file.read_exact(&mut chunk_type_bytes)?;
+    // let chunk_type = u32::from_be_bytes(chunk_type_bytes);
+    let chunk_type_string = str::from_utf8(&chunk_type_bytes).unwrap();
+
+    println!("chunk_type {chunk_type_bytes:?} | str: {chunk_type_string:?}");
+
+    let mut image_data_bytes = vec![0; length];
+    file.read_exact(&mut image_data_bytes)?;
+    println!("image data {}", image_data_bytes.len());
+
+    let mut image_crc: [i32; 4] = [0; 4];
+    file.read_exact(&mut crc_image_header)?;
+    println!("crc value {image_crc:?}");
+    let mut chunk_data = Vec::new();
+    chunk_data.extend_from_slice(&chunk_type_bytes);
+    // chunk_data.extend_from_slice(&legnth_bytes);
+    chunk_data.extend_from_slice(&image_data_bytes);
+
+    // let mut crc_image_header_calculated = 0xffffffff;
+
+    let crc_image_header_calculated_be = crc32(&chunk_data);
+
+    println!("crc value calculated {crc_image_header_calculated_be:?}");
+    println!("crc header value :{}", u32::from_be_bytes(crc_image_header));
+
+    if crc_image_header_calculated_be == u32::from_be_bytes(crc_image_header) {
+        println!("CRC is okay!");
+    } else {
+        println!("CRC is not okay!");
+    }
 
     Ok(())
 }
