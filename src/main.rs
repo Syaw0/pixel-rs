@@ -23,7 +23,7 @@ pub fn crc32(data: &[u8]) -> u32 {
     !crc
 }
 
-fn split_chunks(mut file: &File) -> Result<(), Error> {
+fn split_chunks(mut file: &File) -> Result<String, Error> {
     let mut legnth_bytes = [0; 4];
     file.read_exact(&mut legnth_bytes)?;
 
@@ -39,7 +39,7 @@ fn split_chunks(mut file: &File) -> Result<(), Error> {
 
     let mut image_data_bytes = vec![0; length];
     file.read_exact(&mut image_data_bytes)?;
-    println!("image data {:?}", image_data_bytes);
+    println!("image data {:?}", image_data_bytes.len());
 
     let mut image_crc = [0; 4];
     file.read_exact(&mut image_crc)?;
@@ -61,11 +61,11 @@ fn split_chunks(mut file: &File) -> Result<(), Error> {
     } else {
         println!("CRC is not okay!");
     }
-    Ok(())
+    Ok(chunk_type_string.to_string())
 }
 
 fn main() -> Result<(), Error> {
-    let file_path = "./src/funnyImg-min.png";
+    let file_path = "./src/file3.png";
     let mut file = File::open(file_path)?;
     let mut signature = [0; 8];
     file.read_exact(&mut signature)?;
@@ -77,15 +77,14 @@ fn main() -> Result<(), Error> {
         println!("The file is not a PNG.");
     }
 
-    split_chunks(&file);
-    println!("\n");
-    split_chunks(&file);
-    println!("\n");
-    split_chunks(&file);
-    println!("\n");
-    // split_chunks(&file);
-    println!("\n");
-    // split_chunks(&file);
+    let mut is_done = false;
+    while !is_done {
+        let t = split_chunks(&file)?;
+        println!("\n");
+        if t == "IEND" {
+            is_done = true;
+        }
+    }
 
     return Ok(());
 
