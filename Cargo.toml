@@ -11,3 +11,4 @@ keywords = []
 categories = []
 
 [dependencies]
+flate2 = "1.0.35"
